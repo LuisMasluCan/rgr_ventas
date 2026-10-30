@@ -1,0 +1,2 @@
+ALTER TABLE "maquinarias"
+ADD COLUMN "cantidad" INTEGER NOT NULL DEFAULT 1;
