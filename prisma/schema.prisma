@@ -32,6 +32,8 @@ model Maquinaria {
   motor           String
   potencia        Decimal          @db.Decimal(8, 2)
   peso            Decimal?         @db.Decimal(10, 2)
+  capacidadCucharonDelantero Decimal? @map("capacidad_cucharon_delantero") @db.Decimal(8, 3)
+  capacidadCucharonPosterior Decimal? @map("capacidad_cucharon_posterior") @db.Decimal(8, 3)
   estado          EstadoMaquinaria @default(Disponible)
   cantidad        Int              @default(1)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)

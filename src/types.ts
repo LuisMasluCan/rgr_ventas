@@ -19,6 +19,8 @@ export interface Machine {
   engine: string;
   horsepower: number;
   weight?: number;
+  frontBucketCapacity?: number;
+  rearBucketCapacity?: number;
   availability: Availability;
   quantity: number;
   image: string;

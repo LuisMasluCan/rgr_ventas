@@ -21,6 +21,8 @@ interface ApiMachine {
   motor: string;
   potencia: number | string;
   peso: number | string | null;
+  capacidadCucharonDelantero: number | string | null;
+  capacidadCucharonPosterior: number | string | null;
   estado: Machine["availability"];
 }
 
@@ -81,6 +83,12 @@ function mapMachine(machine: ApiMachine): Machine {
     engine: machine.motor,
     horsepower: Number(machine.potencia),
     weight: machine.peso === null ? undefined : Number(machine.peso),
+    frontBucketCapacity: machine.capacidadCucharonDelantero === null
+      ? undefined
+      : Number(machine.capacidadCucharonDelantero),
+    rearBucketCapacity: machine.capacidadCucharonPosterior === null
+      ? undefined
+      : Number(machine.capacidadCucharonPosterior),
     availability: machine.estado,
     category: "Maquinaria",
   };
@@ -237,6 +245,8 @@ function toApiMachine(machine: MachineInput) {
     motor: machine.engine,
     potencia: machine.horsepower,
     peso: machine.weight ?? null,
+    capacidadCucharonDelantero: machine.frontBucketCapacity ?? null,
+    capacidadCucharonPosterior: machine.rearBucketCapacity ?? null,
     estado: machine.availability,
   };
 }

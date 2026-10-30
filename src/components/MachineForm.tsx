@@ -19,6 +19,8 @@ const emptyForm = {
   engine: "",
   horsepower: "",
   weight: "",
+  frontBucketCapacity: "",
+  rearBucketCapacity: "",
   availability: "Disponible" as Availability,
   quantity: "",
   category: "",
@@ -36,6 +38,8 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
     engine: initialMachine?.engine ?? "",
     horsepower: initialMachine ? String(initialMachine.horsepower) : "",
     weight: initialMachine?.weight === undefined ? "" : String(initialMachine.weight),
+    frontBucketCapacity: initialMachine?.frontBucketCapacity === undefined ? "" : String(initialMachine.frontBucketCapacity),
+    rearBucketCapacity: initialMachine?.rearBucketCapacity === undefined ? "" : String(initialMachine.rearBucketCapacity),
     availability: initialMachine?.availability ?? emptyForm.availability,
     quantity: initialMachine ? String(initialMachine.quantity) : "1",
     category: initialMachine?.category ?? "",
@@ -91,6 +95,8 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
     const parsedPrice = Number(form.price);
     const horsepower = Number(form.horsepower);
     const weight = form.weight ? Number(form.weight) : undefined;
+    const frontBucketCapacity = form.frontBucketCapacity ? Number(form.frontBucketCapacity) : undefined;
+    const rearBucketCapacity = form.rearBucketCapacity ? Number(form.rearBucketCapacity) : undefined;
     const quantity = Number(form.quantity);
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0 || !Number.isFinite(horsepower) || horsepower <= 0) {
       setError("Ingresa un precio y una potencia válidos.");
@@ -102,6 +108,12 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
     }
     if (weight !== undefined && (!Number.isFinite(weight) || weight < 0)) {
       setError("Ingresa un peso válido.");
+      return;
+    }
+    if ([frontBucketCapacity, rearBucketCapacity].some((capacity) =>
+      capacity !== undefined && (!Number.isFinite(capacity) || capacity < 0)
+    )) {
+      setError("Ingresa una capacidad de cucharón válida.");
       return;
     }
 
@@ -126,6 +138,8 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
         engine: form.engine.trim(),
         horsepower,
         weight,
+        frontBucketCapacity,
+        rearBucketCapacity,
         availability: form.availability,
         quantity,
         image: savedImage,
@@ -171,7 +185,9 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
             <label className="text-sm font-semibold text-slate-600">Unidades disponibles<input required min="0" step="1" type="number" name="quantity" value={form.quantity} onChange={updateForm} className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600">Motor<input required name="engine" value={form.engine} onChange={updateForm} className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600">Potencia (HP)<input required min="1" step="0.1" type="number" name="horsepower" value={form.horsepower} onChange={updateForm} className={inputClass} /></label>
-            <label className="text-sm font-semibold text-slate-600">Peso (kg)<input min="0" step="1" type="number" name="weight" value={form.weight} onChange={updateForm} className={inputClass} /></label>
+            <label className="text-sm font-semibold text-slate-600">Peso operativo (kg)<input min="0" step="1" type="number" name="weight" value={form.weight} onChange={updateForm} className={inputClass} /></label>
+            <label className="text-sm font-semibold text-slate-600">Capacidad del cucharón delantero (m³)<input min="0" step="0.001" type="number" name="frontBucketCapacity" value={form.frontBucketCapacity} onChange={updateForm} placeholder="Opcional" className={inputClass} /></label>
+            <label className="text-sm font-semibold text-slate-600">Capacidad del cucharón posterior (m³)<input min="0" step="0.001" type="number" name="rearBucketCapacity" value={form.rearBucketCapacity} onChange={updateForm} placeholder="Opcional" className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600 sm:col-span-2">Estado
               <select name="availability" value={form.availability} onChange={updateForm} className={inputClass}>
                 <option>Disponible</option>

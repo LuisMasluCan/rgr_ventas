@@ -73,6 +73,8 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
       motor: requiredString(body, "motor"),
       potencia: requiredNumber(body, "potencia", true),
       peso: nullableNumber(body, "peso"),
+      capacidadCucharonDelantero: nullableNumber(body, "capacidadCucharonDelantero"),
+      capacidadCucharonPosterior: nullableNumber(body, "capacidadCucharonPosterior"),
       estado: quantity === 0
         ? EstadoMaquinaria.Vendido
         : body.estado === undefined
@@ -103,6 +105,8 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
     precio?: number;
     potencia?: number;
     peso?: number | null;
+    capacidadCucharonDelantero?: number | null;
+    capacidadCucharonPosterior?: number | null;
     estado?: EstadoMaquinaria;
   } = {};
   for (const field of ["nombre", "marca", "modelo", "imagenUrl", "motor"] as const) {
@@ -119,6 +123,12 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
   if (body.precio !== undefined) updates.precio = requiredNumber(body, "precio", true);
   if (body.potencia !== undefined) updates.potencia = requiredNumber(body, "potencia", true);
   if (body.peso !== undefined) updates.peso = nullableNumber(body, "peso");
+  if (body.capacidadCucharonDelantero !== undefined) {
+    updates.capacidadCucharonDelantero = nullableNumber(body, "capacidadCucharonDelantero");
+  }
+  if (body.capacidadCucharonPosterior !== undefined) {
+    updates.capacidadCucharonPosterior = nullableNumber(body, "capacidadCucharonPosterior");
+  }
   if (body.estado !== undefined) {
     updates.estado = machineStateToPrisma[enumValue(body.estado, machineStates, "estado")];
   }
