@@ -28,6 +28,7 @@ export default function ProformaPDF({
   const [description, setDescription] = useState(initialDescription);
   const [error, setError] = useState("");
   const client = clients.find((item) => item.id === clientId);
+  const isBackhoe = machine.name.trim().toLowerCase() === "mini retroexcavadora f312";
 
   const printDocument = useReactToPrint({
     contentRef: documentRef,
@@ -159,9 +160,9 @@ export default function ProformaPDF({
                   <tr className="border-b border-slate-200"><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Marca / Modelo</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.brand} / {machine.model}</td></tr>
                   <tr className="border-b border-slate-200"><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Motor</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.engine}</td></tr>
                   <tr className="border-b border-slate-200"><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Potencia</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.horsepower} HP</td></tr>
-                  <tr className={machine.frontBucketCapacity !== undefined || machine.rearBucketCapacity !== undefined ? "border-b border-slate-200" : ""}><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Peso operativo</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.weight !== undefined ? `${machine.weight.toLocaleString("es-PE")} kg` : "Consultar"}</td></tr>
-                  {machine.frontBucketCapacity !== undefined && <tr className={machine.rearBucketCapacity !== undefined ? "border-b border-slate-200" : ""}><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad del cucharón delantero</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.frontBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
-                  {machine.rearBucketCapacity !== undefined && <tr><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad del cucharón posterior</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.rearBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
+                  <tr className={isBackhoe && (machine.frontBucketCapacity !== undefined || machine.rearBucketCapacity !== undefined) ? "border-b border-slate-200" : ""}><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Peso operativo</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.weight !== undefined ? `${machine.weight.toLocaleString("es-PE")} kg` : "Consultar"}</td></tr>
+                  {isBackhoe && machine.frontBucketCapacity !== undefined && <tr className={machine.rearBucketCapacity !== undefined ? "border-b border-slate-200" : ""}><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad cucharón frontal / excavador</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.frontBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
+                  {isBackhoe && machine.rearBucketCapacity !== undefined && <tr><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad cucharón posterior</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.rearBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
                 </tbody>
               </table>
             </div>
