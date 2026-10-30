@@ -6,13 +6,13 @@ import {
   HttpError,
   requireMethod,
   withErrorHandling,
-} from "../src/serverless/handler";
+} from "../src/serverless/handler.js";
 import {
   clearSessionCookie,
   hasValidSession,
   setSessionCookie,
   verifyCredentials,
-} from "../src/serverless/auth";
+} from "../src/serverless/auth.js";
 
 async function authHandler(request: ApiRequest, response: ApiResponse): Promise<void> {
   requireMethod(request, ["GET", "POST", "DELETE"]);

@@ -1,5 +1,5 @@
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
-import { HttpError, type ApiRequest, type ApiResponse } from "./handler";
+import { HttpError, type ApiRequest, type ApiResponse } from "./handler.js";
 
 const cookieName = "rgr_session";
 const sessionDurationSeconds = 8 * 60 * 60;

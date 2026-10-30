@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../src/lib/prisma";
+import { prisma } from "../src/lib/prisma.js";
 import {
   type ApiRequest,
   type ApiResponse,
   requireMethod,
   withErrorHandling,
-} from "../src/serverless/handler";
+} from "../src/serverless/handler.js";
 
 async function healthHandler(req: ApiRequest, res: ApiResponse): Promise<void> {
   requireMethod(req, ["GET"]);

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../src/lib/prisma";
-import { requireAuthenticated } from "../src/serverless/auth";
+import { prisma } from "../src/lib/prisma.js";
+import { requireAuthenticated } from "../src/serverless/auth.js";
 import {
   bodyRecord,
   type ApiRequest,
@@ -10,7 +10,7 @@ import {
   requiredString,
   requireMethod,
   withErrorHandling,
-} from "../src/serverless/handler";
+} from "../src/serverless/handler.js";
 
 const documentoValido = /^(?:\d{8}|\d{11})$/;
 
