@@ -11,6 +11,7 @@ interface ApiClient {
 interface ApiMachine {
   id: string;
   nombre: string;
+  categoria: string;
   marca: string;
   modelo: string;
   precio: number | string;
@@ -57,7 +58,7 @@ export interface ClientInput {
   phone: string;
 }
 
-export type MachineInput = Omit<Machine, "id" | "category">;
+export type MachineInput = Omit<Machine, "id">;
 
 function mapClient(client: ApiClient): Client {
   return {
@@ -73,6 +74,7 @@ function mapMachine(machine: ApiMachine): Machine {
   return {
     id: machine.id,
     name: machine.nombre,
+    category: machine.categoria,
     brand: machine.marca,
     model: machine.modelo,
     price: Number(machine.precio),
@@ -90,7 +92,6 @@ function mapMachine(machine: ApiMachine): Machine {
       ? undefined
       : Number(machine.capacidadCucharonPosterior),
     availability: machine.estado,
-    category: "Maquinaria",
   };
 }
 
@@ -235,6 +236,7 @@ export async function createMachine(machine: MachineInput): Promise<Machine> {
 function toApiMachine(machine: MachineInput) {
   return {
     nombre: machine.name,
+    categoria: machine.category,
     marca: machine.brand,
     modelo: machine.model,
     precio: machine.price,

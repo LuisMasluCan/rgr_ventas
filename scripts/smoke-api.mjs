@@ -83,9 +83,10 @@ for (const path of ["/api/clientes", "/api/maquinarias", "/api/cotizaciones"]) {
     throw new Error(`${path}: se esperaba una lista JSON.`);
   }
   if (path === "/api/maquinarias" && body.some((machine) =>
+    typeof machine.categoria !== "string" || !machine.categoria.trim() ||
     !Array.isArray(machine.fotosDetalle) || !Number.isInteger(machine.cantidad) || machine.cantidad < 0
   )) {
-    throw new Error(`${path}: cada maquinaria debe incluir fotos y una cantidad válida.`);
+    throw new Error(`${path}: cada maquinaria debe incluir categoría, fotos y una cantidad válida.`);
   }
   console.log(`OK ${path}: ${body.length} registro(s)`);
 }

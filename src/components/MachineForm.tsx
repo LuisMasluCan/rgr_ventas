@@ -179,7 +179,7 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
         <form onSubmit={submit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="text-sm font-semibold text-slate-600">Nombre del equipo<input required name="name" value={form.name} onChange={updateForm} className={inputClass} /></label>
-            <label className="text-sm font-semibold text-slate-600">Categoría<input name="category" value={form.category} onChange={updateForm} placeholder="Ej. Retroexcavadoras" className={inputClass} /></label>
+            <label className="text-sm font-semibold text-slate-600">Categoría<input name="category" value={form.category} onChange={updateForm} placeholder="Ej. Camionetas, retroexcavadoras" className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600">Marca<input required name="brand" value={form.brand} onChange={updateForm} className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600">Modelo<input required name="model" value={form.model} onChange={updateForm} className={inputClass} /></label>
             <label className="text-sm font-semibold text-slate-600">Precio (USD)<input required min="1" step="0.01" type="number" name="price" value={form.price} onChange={updateForm} className={inputClass} /></label>

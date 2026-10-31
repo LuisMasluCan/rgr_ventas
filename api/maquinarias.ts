@@ -63,6 +63,7 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
     }
     const created = await prisma.maquinaria.create({ data: {
       nombre: requiredString(body, "nombre"),
+      categoria: body.categoria === undefined ? "Maquinaria" : requiredString(body, "categoria"),
       marca: requiredString(body, "marca"),
       modelo: requiredString(body, "modelo"),
       precio: requiredNumber(body, "precio", true),
@@ -95,6 +96,7 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
   const body = bodyRecord(req);
   const updates: {
     nombre?: string;
+    categoria?: string;
     marca?: string;
     modelo?: string;
     imagenUrl?: string;
@@ -109,7 +111,7 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
     capacidadCucharonPosterior?: number | null;
     estado?: EstadoMaquinaria;
   } = {};
-  for (const field of ["nombre", "marca", "modelo", "imagenUrl", "motor"] as const) {
+  for (const field of ["nombre", "categoria", "marca", "modelo", "imagenUrl", "motor"] as const) {
     if (body[field] !== undefined) updates[field] = requiredString(body, field);
   }
   if (body.fichaTecnicaUrl !== undefined) {
