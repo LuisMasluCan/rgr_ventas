@@ -4,6 +4,7 @@ import { prisma } from "../src/lib/prisma.js";
 import { requireAuthenticated } from "../src/serverless/auth.js";
 import {
   bodyRecord,
+  isRecord,
   type ApiRequest,
   type ApiResponse,
   enumValue,
@@ -41,6 +42,27 @@ function imageArray(value: unknown): string[] {
   return value;
 }
 
+function additionalSpecifications(value: unknown) {
+  if (!Array.isArray(value)) {
+    throw new HttpError(400, 'El campo "especificacionesAdicionales" debe contener títulos y valores de texto válidos.');
+  }
+  return value.map((specification) => {
+    if (
+      !isRecord(specification)
+      || typeof specification.titulo !== "string"
+      || !specification.titulo.trim()
+      || typeof specification.valor !== "string"
+      || !specification.valor.trim()
+    ) {
+      throw new HttpError(400, 'El campo "especificacionesAdicionales" debe contener títulos y valores de texto válidos.');
+    }
+    return {
+      titulo: specification.titulo.trim(),
+      valor: specification.valor.trim(),
+    };
+  });
+}
+
 async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<void> {
   requireMethod(req, ["GET", "POST", "PUT", "DELETE"]);
   requireAuthenticated(req);
@@ -76,6 +98,9 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
       peso: nullableNumber(body, "peso"),
       capacidadCucharonDelantero: nullableNumber(body, "capacidadCucharonDelantero"),
       capacidadCucharonPosterior: nullableNumber(body, "capacidadCucharonPosterior"),
+      especificacionesAdicionales: body.especificacionesAdicionales === undefined
+        ? []
+        : additionalSpecifications(body.especificacionesAdicionales),
       estado: quantity === 0
         ? EstadoMaquinaria.Vendido
         : body.estado === undefined
@@ -109,6 +134,7 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
     peso?: number | null;
     capacidadCucharonDelantero?: number | null;
     capacidadCucharonPosterior?: number | null;
+    especificacionesAdicionales?: { titulo: string; valor: string }[];
     estado?: EstadoMaquinaria;
   } = {};
   for (const field of ["nombre", "categoria", "marca", "modelo", "imagenUrl", "motor"] as const) {
@@ -130,6 +156,9 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
   }
   if (body.capacidadCucharonPosterior !== undefined) {
     updates.capacidadCucharonPosterior = nullableNumber(body, "capacidadCucharonPosterior");
+  }
+  if (body.especificacionesAdicionales !== undefined) {
+    updates.especificacionesAdicionales = additionalSpecifications(body.especificacionesAdicionales);
   }
   if (body.estado !== undefined) {
     updates.estado = machineStateToPrisma[enumValue(body.estado, machineStates, "estado")];

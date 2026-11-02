@@ -139,7 +139,7 @@ function Dashboard({
           <div className="mt-5 space-y-3">
             {machines.slice(0, 3).map((machine) => (
               <div key={machine.id} className="flex items-center gap-3 rounded-xl border border-slate-100 p-3">
-                <img src={machine.image} alt="" className="h-12 w-14 rounded-lg bg-white object-cover" />
+                <img src={machine.image} alt="" className="h-12 w-14 rounded-lg bg-white p-1 object-contain" />
                 <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-slate-800">{machine.name}</p><p className="mt-1 text-xs text-slate-500">{formatCurrency(machine.price)}</p></div>
                 <span className={`h-2 w-2 rounded-full ${machine.availability === "Disponible" ? "bg-corporate-green" : "bg-amber-400"}`} />
               </div>

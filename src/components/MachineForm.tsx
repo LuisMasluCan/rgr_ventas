@@ -1,6 +1,6 @@
 import { useState, type FormEvent, type ChangeEvent } from "react";
-import { ImagePlus, X } from "lucide-react";
-import type { Availability, Machine } from "../types";
+import { ImagePlus, Plus, Trash2, X } from "lucide-react";
+import type { Availability, Machine, MachineSpecification } from "../types";
 import { compressImage, compressImageDataUrl } from "../lib/imageCompression";
 
 const photoLabels = ["Frontal", "Posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2", "Foto del local"];
@@ -49,6 +49,9 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
   const [image, setImage] = useState("");
   const [technicalImage, setTechnicalImage] = useState("");
   const [photos, setPhotos] = useState<string[]>(initialMachine?.photos ?? []);
+  const [specifications, setSpecifications] = useState<MachineSpecification[]>(
+    initialMachine?.especificacionesAdicionales ?? [],
+  );
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [processingPhotos, setProcessingPhotos] = useState(false);
@@ -116,6 +119,13 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
       setError("Ingresa una capacidad de cucharón válida.");
       return;
     }
+    const additionalSpecifications = specifications
+      .map(({ titulo, valor }) => ({ titulo: titulo.trim(), valor: valor.trim() }))
+      .filter(({ titulo, valor }) => titulo || valor);
+    if (additionalSpecifications.some(({ titulo, valor }) => !titulo || !valor)) {
+      setError("Completa el título y el valor de cada especificación o elimina la fila vacía.");
+      return;
+    }
 
     setSaving(true);
     try {
@@ -146,6 +156,7 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
         imagenFichaTecnica: savedTechnicalImage,
         photos,
         category: form.category.trim() || "Maquinaria",
+        especificacionesAdicionales: additionalSpecifications,
       };
       if (await onSave(machine)) onClose();
       else setError("No se pudo guardar la maquinaria. Revisa la conexión e inténtalo nuevamente.");
@@ -207,6 +218,59 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
           </div>
 
           <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold text-slate-700">Especificaciones adicionales</p>
+                <p className="mt-1 text-xs text-slate-500">Agrega cualquier título y valor que describa el equipo.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSpecifications((current) => [...current, { titulo: "", valor: "" }])}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-corporate-blue shadow-sm hover:bg-blue-50"
+              >
+                <Plus size={14} /> Agregar especificación
+              </button>
+            </div>
+            {specifications.length > 0 && <div className="mt-3 space-y-3">
+              {specifications.map((specification, index) => (
+                <div key={index} className="flex items-end gap-2">
+                  <label className="flex-1 text-xs font-semibold text-slate-600">
+                    Título
+                    <input
+                      value={specification.titulo}
+                      onChange={(event) => setSpecifications((current) => current.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, titulo: event.target.value } : item
+                      ))}
+                      placeholder="Ej. Capacidad de Tolva"
+                      className={inputClass}
+                    />
+                  </label>
+                  <label className="flex-1 text-xs font-semibold text-slate-600">
+                    Valor
+                    <input
+                      value={specification.valor}
+                      onChange={(event) => setSpecifications((current) => current.map((item, itemIndex) =>
+                        itemIndex === index ? { ...item, valor: event.target.value } : item
+                      ))}
+                      placeholder="Ej. 15 m³"
+                      className={inputClass}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setSpecifications((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    aria-label={`Eliminar especificación ${index + 1}`}
+                    title="Eliminar especificación"
+                    className="mb-0.5 rounded-lg p-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>}
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
             <p className="text-sm font-semibold text-slate-700">Foto de la maquinaria</p>
             <label className="mt-3 block text-xs font-medium text-slate-500">Subir archivo (máximo 15 MB; se optimiza a 200 KB)
               <input type="file" accept="image/*" onChange={(event) => readImage(event, (value) => { setImage(value); setForm((current) => ({ ...current, imageUrl: "" })); })} className="mt-1.5 block w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-semibold file:text-corporate-blue" />
@@ -214,7 +278,7 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
             <label className="mt-3 block text-xs font-medium text-slate-500">O pegar URL de imagen
               <input type="url" name="imageUrl" value={form.imageUrl} onChange={(event) => { updateForm(event); setImage(""); }} placeholder="https://..." className={inputClass} />
             </label>
-            {(image || form.imageUrl) && <img src={image || form.imageUrl} alt="Vista previa del equipo" className="mt-3 h-32 w-full rounded-lg object-cover" />}
+            {(image || form.imageUrl) && <img src={image || form.imageUrl} alt="Vista previa del equipo" className="mt-3 h-32 w-full rounded-lg bg-white p-3 object-contain" />}
             {!image && !form.imageUrl && <p className="mt-3 flex items-center gap-2 text-xs text-slate-400"><ImagePlus size={15} /> Si no agregas una imagen, se utilizará una foto de muestra.</p>}
           </div>
 
@@ -242,7 +306,7 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
             {processingPhotos && <p role="status" className="mt-2 text-xs text-slate-500">Comprimiendo las fotos seleccionadas…</p>}
             {photos.length > 0 && <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {photos.map((photo, index) => <div key={`${index}-${photo.slice(0, 30)}`} className="overflow-hidden rounded-lg bg-white">
-                <img src={photo} alt={`Vista previa ${photoLabels[index]}`} className="h-24 w-full object-cover" />
+                <img src={photo} alt={`Vista previa ${photoLabels[index]}`} className="h-24 w-full bg-white p-2 object-contain" />
                 <p className="truncate px-2 py-1 text-[10px] font-medium text-slate-600">{photoLabels[index]}</p>
                 <button type="button" aria-label={`Quitar ${photoLabels[index]}`} onClick={() => setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))} className="px-2 pb-2 text-[10px] font-semibold text-red-600 hover:underline">Quitar</button>
               </div>)}

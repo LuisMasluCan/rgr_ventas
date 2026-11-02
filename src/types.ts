@@ -10,6 +10,11 @@ export const DEFAULT_QUOTATION_DESCRIPTION = [
   "Lugar de Entrega: En nuestros almacenes de PUCALLPA",
 ].join("\n");
 
+export interface MachineSpecification {
+  titulo: string;
+  valor: string;
+}
+
 export interface Machine {
   id: string;
   name: string;
@@ -27,6 +32,7 @@ export interface Machine {
   imagenFichaTecnica?: string;
   photos?: string[];
   category: string;
+  especificacionesAdicionales?: MachineSpecification[];
 }
 
 export interface Client {

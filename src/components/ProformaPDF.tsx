@@ -142,8 +142,8 @@ export default function ProformaPDF({
           <div className="mt-9 print:mt-5">
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-corporate-blue print:mb-2">Detalle de la oferta</p>
             <div className="grid grid-cols-[0.85fr_1.15fr] gap-4 print:gap-3">
-              <div className="h-56 overflow-hidden rounded-xl bg-white print:h-[38mm]">
-                <img src={machine.image} alt={machine.name} className="h-full w-full object-cover" />
+              <div className="h-56 overflow-hidden rounded-xl bg-white p-4 print:h-[38mm] print:p-2">
+                <img src={machine.image} alt={machine.name} className="h-full w-full object-contain" />
               </div>
               <table className="h-fit w-full border-collapse text-left text-xs">
                 <thead>
@@ -164,6 +164,12 @@ export default function ProformaPDF({
                   {!isBackhoe && (machine.frontBucketCapacity !== undefined || machine.rearBucketCapacity !== undefined) && <tr><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad del cucharón</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{[machine.frontBucketCapacity, machine.rearBucketCapacity].filter((capacity): capacity is number => capacity !== undefined).map((capacity) => `${capacity.toLocaleString("es-PE")} m³`).join(" · ")}</td></tr>}
                   {isBackhoe && machine.frontBucketCapacity !== undefined && <tr className={machine.rearBucketCapacity !== undefined ? "border-b border-slate-200" : ""}><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad cucharón frontal excavador</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.frontBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
                   {isBackhoe && machine.rearBucketCapacity !== undefined && <tr><td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">Capacidad cucharón posterior excavador</td><td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{machine.rearBucketCapacity.toLocaleString("es-PE")} m³</td></tr>}
+                  {machine.especificacionesAdicionales?.map((specification, index) => (
+                    <tr key={`${specification.titulo}-${index}`} className="border-b border-slate-200 last:border-0">
+                      <td className="px-3 py-3 font-semibold text-slate-600 print:px-2 print:py-2">{specification.titulo}</td>
+                      <td className="px-3 py-3 text-slate-700 print:px-2 print:py-2">{specification.valor}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -209,13 +215,13 @@ export default function ProformaPDF({
             </div>
             <div className="gallery-content flex min-h-0 flex-1 flex-col gap-3 pt-4 print:gap-[3mm] print:pt-[3mm]">
               {machine.photos[6] && <figure className="gallery-store flex h-[270px] shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50 print:h-[65mm] print:rounded-md">
-                <img src={machine.photos[6]} alt="Foto del local de RGR Selva" className="h-0 min-h-0 w-full flex-1 object-cover" />
+                <img src={machine.photos[6]} alt="Foto del local de RGR Selva" className="h-0 min-h-0 w-full flex-1 bg-white p-3 object-contain" />
                 <figcaption className="shrink-0 border-t border-slate-200 bg-white px-3 py-1.5 text-center text-xs font-semibold text-slate-600 print:py-1">Nuestro local</figcaption>
               </figure>}
               <div className={`gallery-detail-grid grid min-h-0 flex-1 grid-cols-2 gap-3 print:gap-[3mm]${machine.photos[6] ? " has-store-photo" : ""}`}>
                 {machine.photos.slice(0, 6).map((photo, index) => (
                   <figure key={`${index}-${photo.slice(0, 30)}`} className="detail-photo flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-slate-50 print:rounded-md">
-                    <img src={photo} alt={`${machine.name}: ${["Frontal", "Posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2"][index]}`} className="h-0 min-h-0 w-full flex-1 object-cover" />
+                    <img src={photo} alt={`${machine.name}: ${["Frontal", "Posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2"][index]}`} className="h-0 min-h-0 w-full flex-1 bg-white p-3 object-contain" />
                     <figcaption className="shrink-0 border-t border-slate-200 bg-white px-3 py-1.5 text-center text-[10px] font-semibold text-slate-600 print:py-1">
                       {["Vista frontal", "Vista posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2"][index]}
                     </figcaption>

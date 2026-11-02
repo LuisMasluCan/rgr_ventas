@@ -1,4 +1,4 @@
-import { DEFAULT_QUOTATION_DESCRIPTION, type Client, type Lead, type LeadStage, type Machine, type Quotation } from "../types";
+import { DEFAULT_QUOTATION_DESCRIPTION, type Client, type Lead, type LeadStage, type Machine, type MachineSpecification, type Quotation } from "../types";
 
 interface ApiClient {
   id: string;
@@ -24,6 +24,7 @@ interface ApiMachine {
   peso: number | string | null;
   capacidadCucharonDelantero: number | string | null;
   capacidadCucharonPosterior: number | string | null;
+  especificacionesAdicionales?: MachineSpecification[] | null;
   estado: Machine["availability"];
 }
 
@@ -92,6 +93,7 @@ function mapMachine(machine: ApiMachine): Machine {
       ? undefined
       : Number(machine.capacidadCucharonPosterior),
     availability: machine.estado,
+    especificacionesAdicionales: machine.especificacionesAdicionales ?? [],
   };
 }
 
@@ -249,6 +251,7 @@ function toApiMachine(machine: MachineInput) {
     peso: machine.weight ?? null,
     capacidadCucharonDelantero: machine.frontBucketCapacity ?? null,
     capacidadCucharonPosterior: machine.rearBucketCapacity ?? null,
+    especificacionesAdicionales: machine.especificacionesAdicionales ?? [],
     estado: machine.availability,
   };
 }

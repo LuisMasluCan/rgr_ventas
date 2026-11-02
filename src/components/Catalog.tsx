@@ -52,10 +52,11 @@ export default function Catalog({ machines, onAddMachine, onEditMachine, onDelet
         {machines.map((machine) => {
           const available = machine.availability === "Disponible" && machine.quantity > 0;
           const availabilityLabel = machine.quantity === 0 ? "Sin unidades" : machine.availability;
+          const additionalSpecifications = machine.especificacionesAdicionales ?? [];
           return (
             <article key={machine.id} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="relative h-52 overflow-hidden bg-white">
-                <img src={machine.image} alt={machine.name} className="h-full w-full object-cover transition duration-500 hover:scale-105" />
+              <div className="relative h-52 overflow-hidden rounded-t-2xl bg-white p-4">
+                <img src={machine.image} alt={machine.name} className="h-full w-full object-contain" />
                 <span className={`absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${available ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
                   {available ? <Check size={14} /> : <Clock3 size={14} />}
                   {availabilityLabel}
@@ -94,6 +95,14 @@ export default function Catalog({ machines, onAddMachine, onEditMachine, onDelet
                     <p className="mt-1 text-sm font-semibold text-slate-700">{machine.weight ? `${machine.weight.toLocaleString("es-PE")} kg` : "Consultar"}</p>
                   </div>
                 </div>
+                {additionalSpecifications.length > 0 && <dl className="mb-4 space-y-2">
+                  {additionalSpecifications.map((specification, index) => (
+                    <div key={`${specification.titulo}-${index}`} className="flex justify-between gap-3 text-sm">
+                      <dt className="text-slate-500">{specification.titulo}</dt>
+                      <dd className="text-right font-semibold text-slate-700">{specification.valor}</dd>
+                    </div>
+                  ))}
+                </dl>}
                 <p className={`mb-4 text-sm font-semibold ${machine.quantity > 0 ? "text-slate-600" : "text-red-600"}`}>
                   Unidades disponibles: {machine.quantity}
                 </p>
