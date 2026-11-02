@@ -55,7 +55,7 @@ export default function Catalog({ machines, onAddMachine, onEditMachine, onDelet
           const additionalSpecifications = machine.especificacionesAdicionales ?? [];
           return (
             <article key={machine.id} className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
-              <div className="relative h-52 overflow-hidden rounded-t-2xl bg-white p-4">
+              <div className="relative h-52 overflow-hidden rounded-t-2xl bg-white">
                 <img src={machine.image} alt={machine.name} className="h-full w-full object-contain" />
                 <span className={`absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${available ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"}`}>
                   {available ? <Check size={14} /> : <Clock3 size={14} />}

@@ -142,7 +142,7 @@ export default function ProformaPDF({
           <div className="mt-9 print:mt-5">
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-corporate-blue print:mb-2">Detalle de la oferta</p>
             <div className="grid grid-cols-[0.85fr_1.15fr] gap-4 print:gap-3">
-              <div className="h-56 overflow-hidden rounded-xl bg-white p-4 print:h-[38mm] print:p-2">
+              <div className="min-h-[14rem] overflow-hidden rounded-lg border border-gray-200 bg-white print:min-h-[38mm]">
                 <img src={machine.image} alt={machine.name} className="h-full w-full object-contain" />
               </div>
               <table className="h-fit w-full border-collapse text-left text-xs">
