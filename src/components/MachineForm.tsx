@@ -307,7 +307,6 @@ export default function MachineForm({ onClose, onSave, initialMachine }: Machine
             {photos.length > 0 && <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {photos.map((photo, index) => <div key={`${index}-${photo.slice(0, 30)}`} className="overflow-hidden rounded-lg bg-white">
                 <img src={photo} alt={`Vista previa ${photoLabels[index]}`} className="h-24 w-full bg-white p-2 object-contain" />
-                <p className="truncate px-2 py-1 text-[10px] font-medium text-slate-600">{photoLabels[index]}</p>
                 <button type="button" aria-label={`Quitar ${photoLabels[index]}`} onClick={() => setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))} className="px-2 pb-2 text-[10px] font-semibold text-red-600 hover:underline">Quitar</button>
               </div>)}
             </div>}

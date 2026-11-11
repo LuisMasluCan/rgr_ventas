@@ -216,15 +216,11 @@ export default function ProformaPDF({
             <div className="gallery-content flex min-h-0 flex-1 flex-col gap-3 pt-4 print:gap-[3mm] print:pt-[3mm]">
               {machine.photos[6] && <figure className="gallery-store flex h-[270px] shrink-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-slate-50 print:h-[65mm] print:rounded-md">
                 <img src={machine.photos[6]} alt="Foto del local de RGR Selva" className="h-0 min-h-0 w-full flex-1 bg-white p-3 object-contain" />
-                <figcaption className="shrink-0 border-t border-slate-200 bg-white px-3 py-1.5 text-center text-xs font-semibold text-slate-600 print:py-1">Nuestro local</figcaption>
               </figure>}
               <div className={`gallery-detail-grid grid min-h-0 flex-1 grid-cols-2 gap-3 print:gap-[3mm]${machine.photos[6] ? " has-store-photo" : ""}`}>
                 {machine.photos.slice(0, 6).map((photo, index) => (
                   <figure key={`${index}-${photo.slice(0, 30)}`} className="detail-photo flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-slate-50 print:rounded-md">
                     <img src={photo} alt={`${machine.name}: ${["Frontal", "Posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2"][index]}`} className="h-0 min-h-0 w-full flex-1 bg-white p-3 object-contain" />
-                    <figcaption className="shrink-0 border-t border-slate-200 bg-white px-3 py-1.5 text-center text-[10px] font-semibold text-slate-600 print:py-1">
-                      {["Vista frontal", "Vista posterior", "Lateral izquierda", "Lateral derecha", "Interior 1", "Interior 2"][index]}
-                    </figcaption>
                   </figure>
                 ))}
               </div>
