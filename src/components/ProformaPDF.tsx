@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { ArrowLeft, Download, FileText } from "lucide-react";
 import { formatCurrency } from "../mockData";
@@ -26,9 +26,67 @@ export default function ProformaPDF({
   const documentRef = useRef<HTMLDivElement>(null);
   const [clientId, setClientId] = useState(initialClientId);
   const [description, setDescription] = useState(initialDescription);
+  const [descriptionDirty, setDescriptionDirty] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState("");
   const client = clients.find((item) => item.id === clientId);
   const isBackhoe = machine.name.trim().toLowerCase() === "mini retroexcavadora f312";
+  const latestDescriptionRef = useRef(description);
+  const descriptionDirtyRef = useRef(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+  const queuedSaveRef = useRef<{ value: string; promise: Promise<boolean> } | null>(null);
+  const clientRef = useRef(client);
+  const saveQuotationRef = useRef(onSaveQuotation);
+  clientRef.current = client;
+  saveQuotationRef.current = onSaveQuotation;
+
+  const persistDescription = useCallback((value: string): Promise<boolean> => {
+    if (queuedSaveRef.current?.value === value) return queuedSaveRef.current.promise;
+    const save = saveQueueRef.current.then(async () => {
+      const currentClient = clientRef.current;
+      if (!currentClient) {
+        throw new Error("Agrega un cliente antes de guardar la descripción.");
+      }
+      setSaveStatus("saving");
+      if (!await saveQuotationRef.current(currentClient, value)) {
+        throw new Error("No se pudo guardar la descripción. Revisa la conexión e inténtalo nuevamente.");
+      }
+      if (latestDescriptionRef.current === value) {
+        descriptionDirtyRef.current = false;
+        setDescriptionDirty(false);
+        setSaveStatus("saved");
+      }
+      return true;
+    });
+    const result = save.catch((saveError: unknown) => {
+      if (latestDescriptionRef.current === value) {
+        setSaveStatus("error");
+        setError(saveError instanceof Error ? saveError.message : "No se pudo guardar la descripción.");
+      }
+      return false;
+    });
+    saveQueueRef.current = result.then(() => undefined);
+    queuedSaveRef.current = { value, promise: result };
+    void result.then(() => {
+      if (queuedSaveRef.current?.promise === result) queuedSaveRef.current = null;
+    });
+    return result;
+  }, []);
+
+  useEffect(() => {
+    if (!descriptionDirty) return;
+    saveTimerRef.current = setTimeout(() => {
+      saveTimerRef.current = null;
+      void persistDescription(description);
+    }, 700);
+    return () => {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+    };
+  }, [description, descriptionDirty, persistDescription]);
 
   const printDocument = useReactToPrint({
     contentRef: documentRef,
@@ -47,8 +105,7 @@ export default function ProformaPDF({
       return;
     }
     try {
-      if (!await onSaveQuotation(client, description)) {
-        setError("No se pudo guardar la cotización. Revisa la conexión con el servidor e inténtalo nuevamente.");
+      if (!await persistDescription(description)) {
         return;
       }
     } catch (saveError) {
@@ -57,6 +114,35 @@ export default function ProformaPDF({
       return;
     }
     printDocument();
+  };
+
+  const handleBack = async () => {
+    if (descriptionDirtyRef.current) {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      if (!await persistDescription(latestDescriptionRef.current)) return;
+    }
+    onBack();
+  };
+
+  const handleDescriptionChange = (value: string) => {
+    latestDescriptionRef.current = value;
+    descriptionDirtyRef.current = true;
+    setDescription(value);
+    setDescriptionDirty(true);
+    setSaveStatus("idle");
+    setError("");
+  };
+
+  const handleDescriptionBlur = () => {
+    if (!descriptionDirtyRef.current) return;
+    if (saveTimerRef.current) {
+      clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = null;
+    }
+    void persistDescription(latestDescriptionRef.current);
   };
 
   const today = new Date().toLocaleDateString("es-PE", {
@@ -74,7 +160,7 @@ export default function ProformaPDF({
           <p className="mt-2 text-sm text-slate-500">Previsualiza el documento y guárdalo como PDF desde la impresión del navegador.</p>
         </div>
         <div className="flex gap-2">
-          <button type="button" onClick={onBack} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
+          <button type="button" onClick={() => void handleBack()} className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">
             <ArrowLeft size={16} /> Volver
           </button>
           <button type="button" onClick={handlePrint} disabled={!client} className="inline-flex items-center gap-2 rounded-xl bg-corporate-green px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60">
@@ -97,13 +183,16 @@ export default function ProformaPDF({
         <span className="block text-sm font-semibold text-slate-600">Descripción de la oferta</span>
         <textarea
           value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          onChange={(event) => handleDescriptionChange(event.target.value)}
+          onBlur={handleDescriptionBlur}
           maxLength={1500}
           rows={3}
           placeholder="Escribe aquí una descripción para esta cotización (opcional)."
           className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100"
         />
-        <span className="mt-1 block text-xs text-slate-400">Se guarda al descargar la proforma. {description.length}/1500</span>
+        <span aria-live="polite" className={`mt-1 block text-xs ${saveStatus === "error" ? "text-red-600" : saveStatus === "saved" ? "text-green-600" : "text-slate-400"}`}>
+          {saveStatus === "saving" ? "Guardando descripción…" : saveStatus === "saved" ? "Descripción guardada automáticamente." : saveStatus === "error" ? "No se pudo guardar la descripción." : "Se guarda automáticamente al escribir."} {description.length}/1500
+        </span>
       </label>
 
       {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm font-medium text-red-700 print:hidden">{error}</p>}
