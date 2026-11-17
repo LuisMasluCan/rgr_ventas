@@ -58,6 +58,13 @@ model Cotizacion {
   @@map("cotizaciones")
 }
 
+model Configuracion {
+  clave String @id
+  valor String
+
+  @@map("configuracion")
+}
+
 enum EstadoMaquinaria {
   Disponible
   EnTransito @map("En Tránsito")

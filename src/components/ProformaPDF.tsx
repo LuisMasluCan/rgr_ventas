@@ -11,7 +11,8 @@ interface ProformaPDFProps {
   quotationNumber: string;
   initialDescription: string;
   onBack: () => void;
-  onSaveQuotation: (client: Client, description: string) => Promise<boolean>;
+  onSaveDescription: (description: string) => Promise<boolean>;
+  onSaveQuotation: (client: Client) => Promise<boolean>;
 }
 
 export default function ProformaPDF({
@@ -21,6 +22,7 @@ export default function ProformaPDF({
   quotationNumber,
   initialDescription,
   onBack,
+  onSaveDescription,
   onSaveQuotation,
 }: ProformaPDFProps) {
   const documentRef = useRef<HTMLDivElement>(null);
@@ -36,20 +38,14 @@ export default function ProformaPDF({
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
   const queuedSaveRef = useRef<{ value: string; promise: Promise<boolean> } | null>(null);
-  const clientRef = useRef(client);
-  const saveQuotationRef = useRef(onSaveQuotation);
-  clientRef.current = client;
-  saveQuotationRef.current = onSaveQuotation;
+  const saveDescriptionRef = useRef(onSaveDescription);
+  saveDescriptionRef.current = onSaveDescription;
 
   const persistDescription = useCallback((value: string): Promise<boolean> => {
     if (queuedSaveRef.current?.value === value) return queuedSaveRef.current.promise;
     const save = saveQueueRef.current.then(async () => {
-      const currentClient = clientRef.current;
-      if (!currentClient) {
-        throw new Error("Agrega un cliente antes de guardar la descripción.");
-      }
       setSaveStatus("saving");
-      if (!await saveQuotationRef.current(currentClient, value)) {
+      if (!await saveDescriptionRef.current(value)) {
         throw new Error("No se pudo guardar la descripción. Revisa la conexión e inténtalo nuevamente.");
       }
       if (latestDescriptionRef.current === value) {
@@ -106,6 +102,10 @@ export default function ProformaPDF({
     }
     try {
       if (!await persistDescription(description)) {
+        return;
+      }
+      if (!await onSaveQuotation(client)) {
+        setError("No se pudo guardar la cotización. Revisa la conexión con el servidor e inténtalo nuevamente.");
         return;
       }
     } catch (saveError) {
@@ -191,7 +191,7 @@ export default function ProformaPDF({
           className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100"
         />
         <span aria-live="polite" className={`mt-1 block text-xs ${saveStatus === "error" ? "text-red-600" : saveStatus === "saved" ? "text-green-600" : "text-slate-400"}`}>
-          {saveStatus === "saving" ? "Guardando descripción…" : saveStatus === "saved" ? "Descripción guardada automáticamente." : saveStatus === "error" ? "No se pudo guardar la descripción." : "Se guarda automáticamente al escribir."} {description.length}/1500
+          {saveStatus === "saving" ? "Guardando descripción general…" : saveStatus === "saved" ? "Descripción general guardada para todas las cotizaciones." : saveStatus === "error" ? "No se pudo guardar la descripción general." : "Se guarda automáticamente para todas las cotizaciones."} {description.length}/1500
         </span>
       </label>
 

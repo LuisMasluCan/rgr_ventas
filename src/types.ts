@@ -61,5 +61,4 @@ export interface Quotation {
   status: QuotationStatus;
   date: string;
   fechaCotizacion: string;
-  description: string;
 }

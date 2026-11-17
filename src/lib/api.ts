@@ -1,4 +1,4 @@
-import { DEFAULT_QUOTATION_DESCRIPTION, type Client, type Lead, type LeadStage, type Machine, type MachineSpecification, type Quotation } from "../types";
+import type { Client, Lead, LeadStage, Machine, MachineSpecification, Quotation } from "../types";
 
 interface ApiClient {
   id: string;
@@ -35,7 +35,6 @@ interface ApiQuotation {
   estado: LeadStage;
   fechaCotizacion: string;
   notas: string | null;
-  descripcion: string | null;
   cliente: ApiClient;
   maquinaria: ApiMachine;
 }
@@ -118,7 +117,6 @@ function mapQuotation(quote: ApiQuotation): MappedQuotation {
       status: quote.estado === "Cierre" ? "Aprobada" : "En revisión",
       date: date.toLocaleDateString("es-PE"),
       fechaCotizacion: quote.fechaCotizacion,
-      description: quote.descripcion ?? DEFAULT_QUOTATION_DESCRIPTION,
     },
   };
 }
@@ -193,6 +191,18 @@ export async function getSalesData(): Promise<SalesData> {
     leads: mappedQuotations.map(({ lead }) => lead),
     quotations: mappedQuotations.map(({ quotation }) => quotation),
   };
+}
+
+export async function getQuotationDescription(): Promise<string> {
+  const setting = await request<{ quotationDescription: string }>("/api/configuracion");
+  return setting.quotationDescription;
+}
+
+export async function saveQuotationDescription(quotationDescription: string): Promise<void> {
+  await request("/api/configuracion", {
+    method: "PUT",
+    body: JSON.stringify({ quotationDescription }),
+  });
 }
 
 export async function createClient(client: ClientInput): Promise<Client> {
@@ -274,7 +284,6 @@ export async function createQuotation(input: {
   clientId: string;
   machineId: string;
   number: string;
-  description: string;
 }): Promise<MappedQuotation> {
   const created = await request<ApiQuotation>("/api/cotizaciones", {
     method: "POST",
@@ -283,16 +292,15 @@ export async function createQuotation(input: {
       maquinariaId: input.machineId,
       estado: "Cotización",
       notas: input.number,
-      descripcion: input.description,
     }),
   });
   return mapQuotation(created);
 }
 
-export async function updateQuotationDetails(id: string, clientId: string, description: string): Promise<void> {
+export async function updateQuotationDetails(id: string, clientId: string): Promise<void> {
   await request(`/api/cotizaciones?id=${encodeURIComponent(id)}`, {
     method: "PUT",
-    body: JSON.stringify({ clienteId: clientId, descripcion: description }),
+    body: JSON.stringify({ clienteId: clientId }),
   });
 }
 

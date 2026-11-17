@@ -32,8 +32,10 @@ import {
   deleteQuotation,
   getSalesData,
   getAuthStatus,
+  getQuotationDescription,
   login,
   logout,
+  saveQuotationDescription,
   updateClient,
   updateMachine,
   updateQuotationDetails,
@@ -226,6 +228,7 @@ export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
+  const [quotationDescription, setQuotationDescription] = useState(DEFAULT_QUOTATION_DESCRIPTION);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
@@ -259,11 +262,12 @@ export default function App() {
   });
 
   const refreshData = useCallback(async () => {
-    const data = await getSalesData();
+    const [data, savedDescription] = await Promise.all([getSalesData(), getQuotationDescription()]);
     setClients(data.clients);
     setMachines(data.machines);
     setLeads(data.leads);
     setQuotations(data.quotations);
+    setQuotationDescription(savedDescription);
     setApiError("");
   }, []);
 
@@ -415,18 +419,18 @@ export default function App() {
     }
   };
 
-  const saveCurrentQuotation = async (client: Client, description: string) => {
+  const saveCurrentQuotation = async (client: Client) => {
     if (!selectedMachine) return false;
     const existingQuotation = selectedQuotationId
       ? quotations.find((quotation) => quotation.id === selectedQuotationId)
       : quotations.find((quotation) => quotation.number === quotationNumber);
     if (existingQuotation) {
       try {
-        await updateQuotationDetails(existingQuotation.id, client.id, description);
+        await updateQuotationDetails(existingQuotation.id, client.id);
         setSelectedQuotationId(existingQuotation.id);
         setQuotations((current) => current.map((quotation) =>
           quotation.id === existingQuotation.id
-            ? { ...quotation, clientId: client.id, description }
+            ? { ...quotation, clientId: client.id }
             : quotation
         ));
         setLeads((current) => current.map((lead) =>
@@ -440,7 +444,7 @@ export default function App() {
       return true;
     }
     try {
-      const created = await createQuotation({ clientId: client.id, machineId: selectedMachine.id, number: quotationNumber, description });
+      const created = await createQuotation({ clientId: client.id, machineId: selectedMachine.id, number: quotationNumber });
       setLeads((current) => [...current, created.lead]);
       setQuotations((current) => [...current, created.quotation]);
       setSelectedQuotationId(created.quotation.id);
@@ -450,6 +454,19 @@ export default function App() {
       return false;
     }
     return true;
+  };
+
+  const saveGlobalQuotationDescription = async (description: string) => {
+    try {
+      await saveQuotationDescription(description);
+      setQuotationDescription(description);
+      setApiError("");
+      return true;
+    } catch (error) {
+      console.error("No se pudo guardar la descripción general de las proformas.", error);
+      setApiError(error instanceof Error ? error.message : "No se pudo guardar la descripción general.");
+      return false;
+    }
   };
 
   const pageTitle = view === "dashboard" ? "Resumen" : view === "proforma" ? "Proforma" : navigation.find((item) => item.id === view)?.label ?? "Resumen";
@@ -554,7 +571,7 @@ export default function App() {
           {view === "clients" && <ClientsPage clients={clients} onAddClient={() => { setEditingClient(undefined); setModal("client"); }} onEditClient={(client) => { setEditingClient(client); setModal("client"); }} onDeleteClient={removeClient} />}
           {view === "kanban" && <Kanban leads={leads} clients={clients} machines={machines} quotations={quotations} onMoveLead={moveLead} />}
           {view === "quotations" && <QuotationsPage quotations={quotations} clients={clients} machines={machines} onOpenQuotation={openSavedQuotation} onDeleteQuotation={removeQuotation} />}
-          {view === "proforma" && selectedMachine && <ProformaPDF machine={selectedMachine} clients={clients} initialClientId={selectedClientId} quotationNumber={quotationNumber} initialDescription={quotations.find((quotation) => quotation.id === selectedQuotationId)?.description ?? DEFAULT_QUOTATION_DESCRIPTION} onBack={() => setView("catalog")} onSaveQuotation={saveCurrentQuotation} />}
+          {view === "proforma" && selectedMachine && <ProformaPDF machine={selectedMachine} clients={clients} initialClientId={selectedClientId} quotationNumber={quotationNumber} initialDescription={quotationDescription} onBack={() => setView("catalog")} onSaveDescription={saveGlobalQuotationDescription} onSaveQuotation={saveCurrentQuotation} />}
         </main>
       </div>
 

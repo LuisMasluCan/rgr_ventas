@@ -91,6 +91,12 @@ for (const path of ["/api/clientes", "/api/maquinarias", "/api/cotizaciones"]) {
   console.log(`OK ${path}: ${body.length} registro(s)`);
 }
 
+const configuration = await getJson("/api/configuracion");
+if (typeof configuration.quotationDescription !== "string") {
+  throw new Error("/api/configuracion: se esperaba la descripción general de la proforma.");
+}
+console.log("OK /api/configuracion: descripción general disponible");
+
 await postJson("/api/clientes", { nombre: "Smoke test", empresa: "No guardar", documento: "invalid", telefono: "000" });
 console.log("OK validación POST: documento inválido rechazado sin insertar datos");
 const photoError = await postJson("/api/maquinarias", {

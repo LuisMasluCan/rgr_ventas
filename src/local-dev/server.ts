@@ -8,6 +8,7 @@ import type { ApiHandler, ApiRequest } from "../serverless/handler";
 import { handleClientes } from "../../api/clientes";
 import { handleCotizaciones } from "../../api/cotizaciones";
 import { handleAuth } from "../../api/auth";
+import { handleConfiguracion } from "../../api/configuracion";
 import { handleHealth } from "../../api/health";
 import { handleMaquinarias } from "../../api/maquinarias";
 import { prisma } from "../lib/prisma";
@@ -41,6 +42,7 @@ app.use(express.json({ limit: "4mb" }));
 
 app.all("/api/health", route(handleHealth));
 app.all("/api/auth", route(handleAuth));
+app.all("/api/configuracion", route(handleConfiguracion));
 app.all("/api/clientes", route(handleClientes));
 app.all("/api/maquinarias", route(handleMaquinarias));
 app.all("/api/cotizaciones", route(handleCotizaciones));
