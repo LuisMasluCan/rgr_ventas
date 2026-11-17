@@ -191,7 +191,7 @@ export default function ProformaPDF({
           className="mt-2 w-full resize-y rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 outline-none focus:border-green-400 focus:ring-2 focus:ring-green-100"
         />
         <span aria-live="polite" className={`mt-1 block text-xs ${saveStatus === "error" ? "text-red-600" : saveStatus === "saved" ? "text-green-600" : "text-slate-400"}`}>
-          {saveStatus === "saving" ? "Guardando descripción general…" : saveStatus === "saved" ? "Descripción general guardada para todas las cotizaciones." : saveStatus === "error" ? "No se pudo guardar la descripción general." : "Se guarda automáticamente para todas las cotizaciones."} {description.length}/1500
+          {saveStatus === "saving" ? "Guardando para esta maquinaria…" : saveStatus === "saved" ? "Guardada para las proformas de esta maquinaria." : saveStatus === "error" ? "No se pudo guardar la descripción de esta maquinaria." : "Se guarda para las proformas de esta maquinaria."} {description.length}/1500
         </span>
       </label>
 

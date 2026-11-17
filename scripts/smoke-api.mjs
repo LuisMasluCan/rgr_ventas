@@ -84,18 +84,13 @@ for (const path of ["/api/clientes", "/api/maquinarias", "/api/cotizaciones"]) {
   }
   if (path === "/api/maquinarias" && body.some((machine) =>
     typeof machine.categoria !== "string" || !machine.categoria.trim() ||
-    !Array.isArray(machine.fotosDetalle) || !Number.isInteger(machine.cantidad) || machine.cantidad < 0
+    !Array.isArray(machine.fotosDetalle) || !Number.isInteger(machine.cantidad) || machine.cantidad < 0 ||
+    (machine.descripcionProforma !== null && typeof machine.descripcionProforma !== "string")
   )) {
-    throw new Error(`${path}: cada maquinaria debe incluir categoría, fotos y una cantidad válida.`);
+    throw new Error(`${path}: cada maquinaria debe incluir categoría, fotos, una cantidad válida y una descripción válida.`);
   }
   console.log(`OK ${path}: ${body.length} registro(s)`);
 }
-
-const configuration = await getJson("/api/configuracion");
-if (typeof configuration.quotationDescription !== "string") {
-  throw new Error("/api/configuracion: se esperaba la descripción general de la proforma.");
-}
-console.log("OK /api/configuracion: descripción general disponible");
 
 await postJson("/api/clientes", { nombre: "Smoke test", empresa: "No guardar", documento: "invalid", telefono: "000" });
 console.log("OK validación POST: documento inválido rechazado sin insertar datos");

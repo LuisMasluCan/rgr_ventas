@@ -63,6 +63,13 @@ function additionalSpecifications(value: unknown) {
   });
 }
 
+function proformaDescription(value: unknown): string {
+  if (typeof value !== "string" || value.length > 1500) {
+    throw new HttpError(400, 'El campo "descripcionProforma" debe ser texto de hasta 1500 caracteres.');
+  }
+  return value;
+}
+
 async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<void> {
   requireMethod(req, ["GET", "POST", "PUT", "DELETE"]);
   requireAuthenticated(req);
@@ -101,6 +108,9 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
       especificacionesAdicionales: body.especificacionesAdicionales === undefined
         ? []
         : additionalSpecifications(body.especificacionesAdicionales),
+      descripcionProforma: body.descripcionProforma === undefined
+        ? null
+        : proformaDescription(body.descripcionProforma),
       estado: quantity === 0
         ? EstadoMaquinaria.Vendido
         : body.estado === undefined
@@ -135,6 +145,7 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
     capacidadCucharonDelantero?: number | null;
     capacidadCucharonPosterior?: number | null;
     especificacionesAdicionales?: { titulo: string; valor: string }[];
+    descripcionProforma?: string;
     estado?: EstadoMaquinaria;
   } = {};
   for (const field of ["nombre", "categoria", "marca", "modelo", "imagenUrl", "motor"] as const) {
@@ -159,6 +170,9 @@ async function maquinariasHandler(req: ApiRequest, res: ApiResponse): Promise<vo
   }
   if (body.especificacionesAdicionales !== undefined) {
     updates.especificacionesAdicionales = additionalSpecifications(body.especificacionesAdicionales);
+  }
+  if (body.descripcionProforma !== undefined) {
+    updates.descripcionProforma = proformaDescription(body.descripcionProforma);
   }
   if (body.estado !== undefined) {
     updates.estado = machineStateToPrisma[enumValue(body.estado, machineStates, "estado")];

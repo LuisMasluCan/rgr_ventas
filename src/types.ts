@@ -33,6 +33,7 @@ export interface Machine {
   photos?: string[];
   category: string;
   especificacionesAdicionales?: MachineSpecification[];
+  proformaDescription?: string;
 }
 
 export interface Client {

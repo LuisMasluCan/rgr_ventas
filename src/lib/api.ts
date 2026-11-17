@@ -1,4 +1,4 @@
-import type { Client, Lead, LeadStage, Machine, MachineSpecification, Quotation } from "../types";
+import { DEFAULT_QUOTATION_DESCRIPTION, type Client, type Lead, type LeadStage, type Machine, type MachineSpecification, type Quotation } from "../types";
 
 interface ApiClient {
   id: string;
@@ -24,6 +24,7 @@ interface ApiMachine {
   peso: number | string | null;
   capacidadCucharonDelantero: number | string | null;
   capacidadCucharonPosterior: number | string | null;
+  descripcionProforma: string | null;
   especificacionesAdicionales?: MachineSpecification[] | null;
   estado: Machine["availability"];
 }
@@ -93,6 +94,7 @@ function mapMachine(machine: ApiMachine): Machine {
       : Number(machine.capacidadCucharonPosterior),
     availability: machine.estado,
     especificacionesAdicionales: machine.especificacionesAdicionales ?? [],
+    proformaDescription: machine.descripcionProforma ?? DEFAULT_QUOTATION_DESCRIPTION,
   };
 }
 
@@ -193,18 +195,6 @@ export async function getSalesData(): Promise<SalesData> {
   };
 }
 
-export async function getQuotationDescription(): Promise<string> {
-  const setting = await request<{ quotationDescription: string }>("/api/configuracion");
-  return setting.quotationDescription;
-}
-
-export async function saveQuotationDescription(quotationDescription: string): Promise<void> {
-  await request("/api/configuracion", {
-    method: "PUT",
-    body: JSON.stringify({ quotationDescription }),
-  });
-}
-
 export async function createClient(client: ClientInput): Promise<Client> {
   const created = await request<ApiClient>("/api/clientes", {
     method: "POST",
@@ -262,6 +252,7 @@ function toApiMachine(machine: MachineInput) {
     capacidadCucharonDelantero: machine.frontBucketCapacity ?? null,
     capacidadCucharonPosterior: machine.rearBucketCapacity ?? null,
     especificacionesAdicionales: machine.especificacionesAdicionales ?? [],
+    descripcionProforma: machine.proformaDescription,
     estado: machine.availability,
   };
 }
@@ -270,6 +261,14 @@ export async function updateMachine(id: string, machine: MachineInput): Promise<
   const updated = await request<ApiMachine>(`/api/maquinarias?id=${encodeURIComponent(id)}`, {
     method: "PUT",
     body: JSON.stringify(toApiMachine(machine)),
+  });
+  return mapMachine(updated);
+}
+
+export async function updateMachineProformaDescription(id: string, description: string): Promise<Machine> {
+  const updated = await request<ApiMachine>(`/api/maquinarias?id=${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: JSON.stringify({ descripcionProforma: description }),
   });
   return mapMachine(updated);
 }

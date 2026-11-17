@@ -36,6 +36,7 @@ model Maquinaria {
   capacidadCucharonDelantero Decimal? @map("capacidad_cucharon_delantero") @db.Decimal(8, 3)
   capacidadCucharonPosterior Decimal? @map("capacidad_cucharon_posterior") @db.Decimal(8, 3)
   especificacionesAdicionales Json @default("[]") @map("especificaciones_adicionales")
+  descripcionProforma String? @map("descripcion_proforma")
   estado          EstadoMaquinaria @default(Disponible)
   cantidad        Int              @default(1)
   createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)

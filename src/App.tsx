@@ -32,12 +32,11 @@ import {
   deleteQuotation,
   getSalesData,
   getAuthStatus,
-  getQuotationDescription,
   login,
   logout,
-  saveQuotationDescription,
   updateClient,
   updateMachine,
+  updateMachineProformaDescription,
   updateQuotationDetails,
   updateQuotationStage,
 } from "./lib/api";
@@ -228,7 +227,6 @@ export default function App() {
   const [clients, setClients] = useState<Client[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [quotations, setQuotations] = useState<Quotation[]>([]);
-  const [quotationDescription, setQuotationDescription] = useState(DEFAULT_QUOTATION_DESCRIPTION);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
@@ -262,12 +260,11 @@ export default function App() {
   });
 
   const refreshData = useCallback(async () => {
-    const [data, savedDescription] = await Promise.all([getSalesData(), getQuotationDescription()]);
+    const data = await getSalesData();
     setClients(data.clients);
     setMachines(data.machines);
     setLeads(data.leads);
     setQuotations(data.quotations);
-    setQuotationDescription(savedDescription);
     setApiError("");
   }, []);
 
@@ -456,15 +453,17 @@ export default function App() {
     return true;
   };
 
-  const saveGlobalQuotationDescription = async (description: string) => {
+  const saveMachineProformaDescription = async (machineId: string, description: string) => {
     try {
-      await saveQuotationDescription(description);
-      setQuotationDescription(description);
+      const updatedMachine = await updateMachineProformaDescription(machineId, description);
+      setMachines((current) => current.map((machine) =>
+        machine.id === updatedMachine.id ? updatedMachine : machine
+      ));
       setApiError("");
       return true;
     } catch (error) {
-      console.error("No se pudo guardar la descripción general de las proformas.", error);
-      setApiError(error instanceof Error ? error.message : "No se pudo guardar la descripción general.");
+      console.error("No se pudo guardar la descripción de la maquinaria.", error);
+      setApiError(error instanceof Error ? error.message : "No se pudo guardar la descripción de la maquinaria.");
       return false;
     }
   };
@@ -571,7 +570,7 @@ export default function App() {
           {view === "clients" && <ClientsPage clients={clients} onAddClient={() => { setEditingClient(undefined); setModal("client"); }} onEditClient={(client) => { setEditingClient(client); setModal("client"); }} onDeleteClient={removeClient} />}
           {view === "kanban" && <Kanban leads={leads} clients={clients} machines={machines} quotations={quotations} onMoveLead={moveLead} />}
           {view === "quotations" && <QuotationsPage quotations={quotations} clients={clients} machines={machines} onOpenQuotation={openSavedQuotation} onDeleteQuotation={removeQuotation} />}
-          {view === "proforma" && selectedMachine && <ProformaPDF machine={selectedMachine} clients={clients} initialClientId={selectedClientId} quotationNumber={quotationNumber} initialDescription={quotationDescription} onBack={() => setView("catalog")} onSaveDescription={saveGlobalQuotationDescription} onSaveQuotation={saveCurrentQuotation} />}
+          {view === "proforma" && selectedMachine && <ProformaPDF machine={selectedMachine} clients={clients} initialClientId={selectedClientId} quotationNumber={quotationNumber} initialDescription={selectedMachine.proformaDescription ?? DEFAULT_QUOTATION_DESCRIPTION} onBack={() => setView("catalog")} onSaveDescription={(description) => saveMachineProformaDescription(selectedMachine.id, description)} onSaveQuotation={saveCurrentQuotation} />}
         </main>
       </div>
 
